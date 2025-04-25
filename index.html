@@ -162,7 +162,101 @@
     <!-- Waste Assistant Chatbot Card -->
     <div class="card">
       <h2>Waste Assistant Chat</h2>
-      <df-messenger
-        intent="WELCOME"
-        chat-title="Waste Assistant"
-        agent-id="d
+      <p>Use the chat icon at the bottom right to talk to the bot!</p>
+    </div>
+  </div>
+
+  <!-- Dialogflow Messenger -->
+  <df-messenger
+    intent="WELCOME"
+    chat-title="WasteMbot"
+    agent-id="d61fa5f8-ca32-4774-a65d-593e1e6cec91"
+    language-code="en">
+  </df-messenger>
+
+  <!-- TensorFlow JS script -->
+  <script>
+    const modelUrl = "https://arulmani07.github.io/WasteMbot/model/model.json";
+    let model;
+    
+    const upload = document.getElementById("image-upload");
+    const preview = document.getElementById("preview");
+    const resultDiv = document.getElementById("result");
+    const loadingDiv = document.querySelector(".loading");
+    const tipDiv = document.getElementById("tip");
+    
+    const classNames = ["Dry Waste", "Wet Waste", "E-Waste", "Hazardous"];
+
+    async function init() {
+      try {
+        loadingDiv.style.display = "block";
+        model = await tf.loadLayersModel(modelUrl);
+        console.log("Model loaded");
+        loadingDiv.style.display = "none";
+        upload.disabled = false;
+      } catch (err) {
+        console.error("Model load error:", err);
+        resultDiv.innerHTML = `<p class="error">⚠️ Failed to load detection model.</p>`;
+      }
+    }
+
+    upload.addEventListener("change", function(e) {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(event) {
+          preview.src = event.target.result;
+          preview.style.display = "block";
+          detectWaste(preview);
+        }
+        reader.readAsDataURL(file);
+      }
+    });
+
+    async function detectWaste(imageElement) {
+      try {
+        resultDiv.innerHTML = "";
+        tipDiv.style.display = "none";
+        loadingDiv.style.display = "block";
+
+        const tensor = tf.browser.fromPixels(imageElement)
+          .resizeNearestNeighbor([224, 224])
+          .toFloat()
+          .expandDims();
+
+        const prediction = await model.predict(tensor).data();
+        const maxProb = Math.max(...prediction);
+        const index = prediction.indexOf(maxProb);
+        const predictedClass = classNames[index];
+
+        loadingDiv.style.display = "none";
+        resultDiv.innerHTML = `
+          <p><strong>Detected:</strong> ${predictedClass}</p>
+          <p><strong>Confidence:</strong> ${Math.round(maxProb * 100)}%</p>
+        `;
+        tipDiv.style.display = "block";
+        tipDiv.innerHTML = `💡 ${getWasteTip(predictedClass)}`;
+      } catch (err) {
+        console.error("Prediction error:", err);
+        loadingDiv.style.display = "none";
+        resultDiv.innerHTML = `<p class="error">⚠️ Detection failed. Try another image.</p>`;
+      }
+    }
+
+    function getWasteTip(type) {
+      const tips = {
+        "Dry Waste": "Rinse and recycle in the blue bin.",
+        "Wet Waste": "Compost in green bin or use for biogas.",
+        "E-Waste": "Take to certified e-waste recycling centers.",
+        "Hazardous": "Handle with care. Dispose at hazardous waste facilities only."
+      };
+      return tips[type] || "Please check local disposal rules.";
+    }
+
+    window.onload = () => {
+      init();
+      upload.disabled = true;
+    };
+  </script>
+</body>
+</html>
