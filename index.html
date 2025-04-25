@@ -1,6 +1,8 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>WasteMBot Assistant</title>
   <style>
     :root {
@@ -158,11 +160,14 @@
     <!-- Chatbot Card -->
     <div class="card">
       <h2>Chat Assistant</h2>
-      <iframe
-        id="chatbot"
-        allow="microphone;"
-        src="https://console.dialogflow.com/api-client/demo/embedded/d61fa5f8-ca32-4774-a65d-593e1e6cec91">
-      </iframe>
+      <!-- Dialogflow Messenger -->
+      <script src="https://www.gstatic.com/dialogflow-console/fast/messenger/bootstrap.js?v=1"></script>
+      <df-messenger
+        intent="WELCOME"
+        chat-title="WasteMbot"
+        agent-id="d61fa5f8-ca32-4774-a65d-593e1e6cec91"
+        language-code="en"
+      ></df-messenger>
     </div>
   </div>
 
@@ -233,7 +238,7 @@
         
         // Show results
         loadingDiv.style.display = "none";
-        resultDiv.innerHTML = `
+        resultDiv.innerHTML = `  
           <p><strong>Type:</strong> ${predictedClass}</p>
           <p><strong>Confidence:</strong> ${Math.round(maxProb * 100)}%</p>
         `;
