@@ -134,11 +134,12 @@
     #file-input {
       display: none;
     }
-    .dialogflow-iframe {
+    .dialogflow-container {
       width: 100%;
       height: 500px;
       border: none;
       border-radius: 8px;
+      margin-bottom: 15px;
     }
   </style>
 </head>
@@ -155,7 +156,13 @@
           <li>Upload images of waste items</li>
         </ul>
       </div>
-      <!-- Dialogflow iframe will be inserted here -->
+      
+      <!-- Dialogflow Container -->
+      <iframe 
+        class="dialogflow-container"
+        allow="microphone"
+        src="https://console.dialogflow.com/api-client/demo/embedded/d61fa5f8-ca32-4774-a65d-593e1e6cec91">
+      </iframe>
     </div>
     <div class="chat-input">
       <input type="text" id="user-input" placeholder="Type your message...">
@@ -188,23 +195,11 @@
         model = await tf.loadLayersModel(modelUrl);
         console.log("Model loaded successfully!");
         hideTypingIndicator();
-        
-        // Initialize Dialogflow after model loads
-        initDialogflow();
       } catch (error) {
         console.error("Model loading failed:", error);
         addMessage("⚠️ Error loading waste detector. Please refresh.", "error");
         hideTypingIndicator();
       }
-    }
-    
-    // Initialize Dialogflow
-    function initDialogflow() {
-      const iframe = document.createElement('iframe');
-      iframe.className = 'dialogflow-iframe';
-      iframe.allow = 'microphone';
-      iframe.src = 'https://bot.dialogflow.com/d61fa5f8-ca32-4774-a65d-593e1e6cec91';
-      chatMessages.appendChild(iframe);
     }
     
     // Handle image uploads
@@ -273,7 +268,7 @@
       const messageDiv = document.createElement("div");
       messageDiv.className = `message ${type}-message`;
       messageDiv.innerHTML = text;
-      chatMessages.appendChild(messageDiv);
+      chatMessages.insertBefore(messageDiv, chatMessages.lastElementChild);
       chatMessages.scrollTop = chatMessages.scrollHeight;
     }
     
@@ -282,7 +277,7 @@
       const imgContainer = document.createElement("div");
       imgContainer.className = `message ${isUser ? 'user' : 'bot'}-message`;
       imgContainer.innerHTML = `<img src="${src}" class="image-message">`;
-      chatMessages.appendChild(imgContainer);
+      chatMessages.insertBefore(imgContainer, chatMessages.lastElementChild);
       chatMessages.scrollTop = chatMessages.scrollHeight;
     }
     
@@ -296,7 +291,7 @@
         <div class="typing-dot"></div>
         <div class="typing-dot"></div>
       `;
-      chatMessages.appendChild(typingDiv);
+      chatMessages.insertBefore(typingDiv, chatMessages.lastElementChild);
       chatMessages.scrollTop = chatMessages.scrollHeight;
     }
     
