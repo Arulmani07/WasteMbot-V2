@@ -1,189 +1,176 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>WasteMBot Assistant</title>
+  <title>WasteMBot - AI Waste Assistant</title>
   <style>
     :root {
-      --green: #4CAF50;
-      --blue: #2196F3;
-      --red: #F44336;
+      --green: #4CAF50;  /* Primary green for buttons and highlights */
+      --blue: #2196F3;   /* Blue for user messages and links */
+      --red: #F44336;    /* Red for errors and warnings */
+      --dark: #333;      /* Dark text */
+      --light: #f5f5f5;  /* Light gray for bot messages */
     }
     body {
-      font-family: Arial, sans-serif;
+      font-family: 'Segoe UI', Arial, sans-serif;
       margin: 0;
+      padding: 0;
+      background: white;  /* Pure white background */
+      color: var(--dark);
+    }
+    .chat-container {
+      max-width: 900px;
+      margin: 20px auto;
+      border-radius: 12px;
+      box-shadow: 0 5px 30px rgba(0,0,0,0.1);
+      overflow: hidden;
+      background: white;  /* White container background */
+    }
+    .chat-header {
+      background: var(--green);  /* Green header */
+      color: white;
+      padding: 15px 20px;
+      font-size: 1.2em;
+      font-weight: bold;
+    }
+    .chat-messages {
+      height: 500px;
       padding: 20px;
-      background: #f5f9fc;
+      overflow-y: auto;
+      background: white;  /* White message area */
     }
-    .header {
-      text-align: center;
-      margin-bottom: 30px;
+    .message {
+      margin-bottom: 15px;
+      max-width: 80%;
+      padding: 12px 16px;
+      border-radius: 18px;
+      line-height: 1.4;
     }
-    .header h1 {
-      color: var(--green);
-      font-size: 2.2em;
-      margin-bottom: 5px;
+    .bot-message {
+      background: var(--light);
+      border-bottom-left-radius: 5px;
+      align-self: flex-start;
+      color: var(--dark);  /* Dark text for bot messages */
     }
-    .container {
+    .user-message {
+      background: var(--blue);  /* Blue background for user messages */
+      color: white;
+      border-bottom-right-radius: 5px;
+      margin-left: auto;
+    }
+    .image-message {
+      max-width: 200px;
+      border-radius: 8px;
+      margin: 5px 0;
+    }
+    .chat-input {
       display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 30px;
-      max-width: 1200px;
-      margin: 0 auto;
+      padding: 15px;
+      background: white;  /* White input area */
+      border-top: 1px solid #eee;
     }
-    .card {
-      background: white;
-      border-radius: 15px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      padding: 25px;
-      width: 350px;
-    }
-    .card h2 {
-      color: var(--blue);
-      margin-top: 0;
-      border-bottom: 2px solid #eee;
-      padding-bottom: 10px;
-    }
-    .upload-area {
-      text-align: center;
-      margin: 20px 0;
-    }
-    #image-upload {
-      display: none;
+    #user-input {
+      flex: 1;
+      padding: 12px 15px;
+      border: 1px solid #ddd;
+      border-radius: 25px;
+      font-size: 16px;
+      outline: none;
+      color: var(--dark);  /* Dark text for input */
     }
     .upload-btn {
-      background: var(--blue);
-      color: white;
-      padding: 12px 25px;
+      background: transparent;
       border: none;
-      border-radius: 8px;
       cursor: pointer;
-      font-size: 16px;
-      font-weight: bold;
-      transition: all 0.3s;
+      margin-left: 10px;
+      color: var(--blue);  /* Blue upload icon */
+      font-size: 24px;
     }
-    .upload-btn:hover {
-      background: #1976D2;
-      transform: translateY(-2px);
-    }
-    #preview {
-      max-width: 100%;
-      max-height: 250px;
-      border-radius: 8px;
-      display: none;
-      margin: 15px auto;
-      border: 3px solid var(--green);
-    }
-    #result {
-      padding: 15px;
-      background: #f8f8f8;
-      border-radius: 8px;
-      margin: 15px 0;
-      min-height: 60px;
-    }
-    #chatbot {
-      width: 100%;
-      height: 500px;
-      border: none;
-      border-radius: 8px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    }
-    .loading {
-      display: none;
-      text-align: center;
-      margin: 20px 0;
-    }
-    .loader {
-      border: 5px solid #f3f3f3;
-      border-top: 5px solid var(--green);
-      border-radius: 50%;
-      width: 40px;
-      height: 40px;
-      animation: spin 1s linear infinite;
-      margin: 0 auto 10px;
-    }
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-    .waste-tip {
-      background: var(--green);
+    .send-btn {
+      background: var(--green);  /* Green send button */
       color: white;
-      padding: 12px;
-      border-radius: 8px;
-      margin-top: 15px;
+      border: none;
+      border-radius: 50%;
+      width: 45px;
+      height: 45px;
+      margin-left: 10px;
+      cursor: pointer;
+      font-size: 18px;
     }
-    .error {
-      color: var(--red);
+    .detection-result {
+      background: var(--light);
+      padding: 15px;
+      border-radius: 8px;
+      margin-top: 10px;
+      color: var(--dark);
+    }
+    .waste-type {
+      color: var(--green);  /* Green for waste type labels */
       font-weight: bold;
     }
-    @media (max-width: 768px) {
-      .container {
-        flex-direction: column;
-        align-items: center;
-      }
+    .confidence {
+      color: var(--blue);   /* Blue for confidence percentage */
+    }
+    .error-message {
+      color: var(--red);    /* Red for error messages */
+      font-weight: bold;
+    }
+    .typing-indicator {
+      display: inline-block;
+      padding: 10px;
+      color: var(--dark);
+    }
+    .typing-dot {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      background: var(--green);  /* Green typing dots */
+      border-radius: 50%;
+      margin: 0 2px;
+      animation: typing 1.4s infinite ease-in-out;
+    }
+    @keyframes typing {
+      0%, 60%, 100% { transform: translateY(0); }
+      30% { transform: translateY(-5px); }
+    }
+    #file-input {
+      display: none;
     }
   </style>
 </head>
 <body>
-  <div class="header">
-    <h1>♻ WasteMBot Assistant</h1>
-    <p>Upload waste images or chat with our assistant</p>
-  </div>
-
-  <div class="container">
-    <!-- Image Detection Card -->
-    <div class="card">
-      <h2>Image Detection</h2>
-      <div class="upload-area">
-        <label for="image-upload" class="upload-btn">📷 Upload Image</label>
-        <input type="file" id="image-upload" accept="image/*">
-      </div>
-      <img id="preview" alt="Image Preview">
-      
-      <div class="loading">
-        <div class="loader"></div>
-        <p>Detecting waste type...</p>
-      </div>
-      
-      <div id="result">
-        <p>Results will appear here</p>
-      </div>
-      
-      <div id="tip" class="waste-tip" style="display:none;">
-        💡 Disposal advice will appear here
+  <div class="chat-container">
+    <div class="chat-header">
+      ♻ WasteMBot Assistant
+    </div>
+    <div class="chat-messages" id="chat-messages">
+      <div class="message bot-message">
+        Hello! I'm your waste management assistant. You can:
+        <ul>
+          <li>Ask me about <span class="waste-type">waste classification</span></li>
+          <li>Upload images of waste items</li>
+        </ul>
       </div>
     </div>
-
-    <!-- Chatbot Card -->
-    <div class="card">
-      <h2>Chat Assistant</h2>
-      <!-- Dialogflow Messenger -->
-      <script src="https://www.gstatic.com/dialogflow-console/fast/messenger/bootstrap.js?v=1"></script>
-      <df-messenger
-        intent="WELCOME"
-        chat-title="WasteMbot"
-        agent-id="d61fa5f8-ca32-4774-a65d-593e1e6cec91"
-        language-code="en"
-      ></df-messenger>
+    <div class="chat-input">
+      <input type="text" id="user-input" placeholder="Type your message...">
+      <label for="file-input" class="upload-btn">📎</label>
+      <input type="file" id="file-input" accept="image/*">
+      <button class="send-btn" id="send-btn">➤</button>
     </div>
   </div>
 
-  <!-- TensorFlow.js -->
+  <!-- TensorFlow.js for image detection -->
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.18.0/dist/tf.min.js"></script>
   <script>
-    // Your Teachable Machine model
+    // DOM Elements
+    const chatMessages = document.getElementById('chat-messages');
+    const userInput = document.getElementById('user-input');
+    const sendBtn = document.getElementById('send-btn');
+    const fileInput = document.getElementById('file-input');
+    
+    // Load your Teachable Machine model
     const modelUrl = "https://teachablemachine.withgoogle.com/models/Ob5Nn-csT/model.json";
     let model;
-    
-    // DOM elements
-    const upload = document.getElementById("image-upload");
-    const preview = document.getElementById("preview");
-    const resultDiv = document.getElementById("result");
-    const loadingDiv = document.querySelector(".loading");
-    const tipDiv = document.getElementById("tip");
     
     // Class names (must match your model's classes exactly)
     const classNames = ["Dry Waste", "Wet Waste", "E-Waste", "Hazardous"];
@@ -191,27 +178,30 @@
     // Initialize the model
     async function initModel() {
       try {
-        loadingDiv.style.display = "block";
+        showTypingIndicator();
         model = await tf.loadLayersModel(modelUrl);
         console.log("Model loaded successfully!");
-        loadingDiv.style.display = "none";
-        upload.disabled = false;
+        hideTypingIndicator();
       } catch (error) {
         console.error("Model loading failed:", error);
-        resultDiv.innerHTML = `<p class="error">⚠️ Error loading waste detector. Please refresh.</p>`;
-        loadingDiv.style.display = "none";
+        addMessage("⚠️ Error loading waste detector. Please refresh.", "error");
+        hideTypingIndicator();
       }
     }
     
     // Handle image uploads
-    upload.addEventListener("change", function(e) {
+    fileInput.addEventListener("change", function(e) {
       const file = e.target.files[0];
       if (file) {
         const reader = new FileReader();
         reader.onload = function(event) {
-          preview.src = event.target.result;
-          preview.style.display = "block";
-          detectWaste(preview);
+          // Show user's uploaded image
+          addImageMessage(event.target.result, true);
+          
+          // Create image element for detection
+          const img = new Image();
+          img.src = event.target.result;
+          img.onload = () => detectWaste(img);
         }
         reader.readAsDataURL(file);
       }
@@ -220,12 +210,9 @@
     // Detect waste type
     async function detectWaste(imageElement) {
       try {
-        // Show loading state
-        resultDiv.innerHTML = "";
-        tipDiv.style.display = "none";
-        loadingDiv.style.display = "block";
+        showTypingIndicator();
         
-        // Process image
+        // Preprocess image
         const tensor = tf.browser.fromPixels(imageElement)
           .resizeNearestNeighbor([224, 224])
           .toFloat()
@@ -237,20 +224,18 @@
         const predictedClass = classNames[prediction.indexOf(maxProb)];
         
         // Show results
-        loadingDiv.style.display = "none";
-        resultDiv.innerHTML = `  
-          <p><strong>Type:</strong> ${predictedClass}</p>
-          <p><strong>Confidence:</strong> ${Math.round(maxProb * 100)}%</p>
-        `;
-        
-        // Show disposal tip
-        tipDiv.style.display = "block";
-        tipDiv.innerHTML = `💡 ${getWasteTip(predictedClass)}`;
+        hideTypingIndicator();
+        addMessage(`
+          <div class="detection-result">
+            <p><span class="waste-type">${predictedClass}</span> detected with <span class="confidence">${Math.round(maxProb * 100)}% confidence</span></p>
+            <p>💡 ${getWasteTip(predictedClass)}</p>
+          </div>
+        `, "bot");
         
       } catch (error) {
         console.error("Detection failed:", error);
-        loadingDiv.style.display = "none";
-        resultDiv.innerHTML = `<p class="error">⚠️ Failed to analyze image. Try another.</p>`;
+        hideTypingIndicator();
+        addMessage("⚠️ Failed to analyze image. Please try another.", "error");
       }
     }
     
@@ -262,13 +247,70 @@
         "E-Waste": "Take to certified e-waste recycling centers.",
         "Hazardous": "Handle carefully. Dispose at hazardous waste facilities only."
       };
-      return tips[wasteType] || "Check local disposal guidelines.";
+      return tips[wasteType] || "Please check local disposal guidelines.";
+    }
+    
+    // Add message to chat
+    function addMessage(text, type = "user") {
+      const messageDiv = document.createElement("div");
+      messageDiv.className = `message ${type}-message`;
+      messageDiv.innerHTML = text;
+      chatMessages.appendChild(messageDiv);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+    
+    // Add image to chat
+    function addImageMessage(src, isUser = false) {
+      const imgContainer = document.createElement("div");
+      imgContainer.className = `message ${isUser ? 'user' : 'bot'}-message`;
+      imgContainer.innerHTML = `<img src="${src}" class="image-message">`;
+      chatMessages.appendChild(imgContainer);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+    
+    // Typing indicator
+    function showTypingIndicator() {
+      const typingDiv = document.createElement("div");
+      typingDiv.className = "message bot-message typing-indicator";
+      typingDiv.id = "typing-indicator";
+      typingDiv.innerHTML = `
+        <div class="typing-dot"></div>
+        <div class="typing-dot"></div>
+        <div class="typing-dot"></div>
+      `;
+      chatMessages.appendChild(typingDiv);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+    
+    function hideTypingIndicator() {
+      const typing = document.getElementById("typing-indicator");
+      if (typing) typing.remove();
     }
     
     // Initialize when page loads
     window.onload = function() {
       initModel();
-      upload.disabled = true; // Disable until model loads
+      
+      // Send message on button click
+      sendBtn.addEventListener("click", function() {
+        const message = userInput.value.trim();
+        if (message) {
+          addMessage(message, "user");
+          userInput.value = "";
+          // Here you would typically send to Dialogflow
+          // For now we'll simulate a response
+          setTimeout(() => {
+            addMessage("I'm your waste assistant. Try uploading an image for classification!", "bot");
+          }, 1000);
+        }
+      });
+      
+      // Also send on Enter key
+      userInput.addEventListener("keypress", function(e) {
+        if (e.key === "Enter") {
+          sendBtn.click();
+        }
+      });
     };
   </script>
 </body>
