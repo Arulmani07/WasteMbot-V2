@@ -4,18 +4,17 @@
   <title>WasteMBot - AI Waste Assistant</title>
   <style>
     :root {
-      --green: #4CAF50;  /* Primary green for buttons and highlights */
-      --blue: #2196F3;   /* Blue for user messages and links */
-      --red: #F44336;    /* Red for errors and warnings */
-      --dark: #333;      /* Dark text */
-      --light: #f5f5f5;  /* Light gray for bot messages */
+      --green: #4CAF50;
+      --blue: #2196F3;
+      --red: #F44336;
+      --dark: #333;
+      --light: #f5f5f5;
     }
     body {
       font-family: 'Segoe UI', Arial, sans-serif;
       margin: 0;
       padding: 0;
-      background: white;  /* Pure white background */
-      color: var(--dark);
+      background: white;
     }
     .chat-container {
       max-width: 900px;
@@ -23,10 +22,10 @@
       border-radius: 12px;
       box-shadow: 0 5px 30px rgba(0,0,0,0.1);
       overflow: hidden;
-      background: white;  /* White container background */
+      background: white;
     }
     .chat-header {
-      background: var(--green);  /* Green header */
+      background: var(--green);
       color: white;
       padding: 15px 20px;
       font-size: 1.2em;
@@ -36,7 +35,7 @@
       height: 500px;
       padding: 20px;
       overflow-y: auto;
-      background: white;  /* White message area */
+      background: white;
     }
     .message {
       margin-bottom: 15px;
@@ -49,10 +48,10 @@
       background: var(--light);
       border-bottom-left-radius: 5px;
       align-self: flex-start;
-      color: var(--dark);  /* Dark text for bot messages */
+      color: var(--dark);
     }
     .user-message {
-      background: var(--blue);  /* Blue background for user messages */
+      background: var(--blue);
       color: white;
       border-bottom-right-radius: 5px;
       margin-left: auto;
@@ -65,7 +64,7 @@
     .chat-input {
       display: flex;
       padding: 15px;
-      background: white;  /* White input area */
+      background: white;
       border-top: 1px solid #eee;
     }
     #user-input {
@@ -75,18 +74,18 @@
       border-radius: 25px;
       font-size: 16px;
       outline: none;
-      color: var(--dark);  /* Dark text for input */
+      color: var(--dark);
     }
     .upload-btn {
       background: transparent;
       border: none;
       cursor: pointer;
       margin-left: 10px;
-      color: var(--blue);  /* Blue upload icon */
+      color: var(--blue);
       font-size: 24px;
     }
     .send-btn {
-      background: var(--green);  /* Green send button */
+      background: var(--green);
       color: white;
       border: none;
       border-radius: 50%;
@@ -104,14 +103,14 @@
       color: var(--dark);
     }
     .waste-type {
-      color: var(--green);  /* Green for waste type labels */
+      color: var(--green);
       font-weight: bold;
     }
     .confidence {
-      color: var(--blue);   /* Blue for confidence percentage */
+      color: var(--blue);
     }
     .error-message {
-      color: var(--red);    /* Red for error messages */
+      color: var(--red);
       font-weight: bold;
     }
     .typing-indicator {
@@ -123,7 +122,7 @@
       display: inline-block;
       width: 8px;
       height: 8px;
-      background: var(--green);  /* Green typing dots */
+      background: var(--green);
       border-radius: 50%;
       margin: 0 2px;
       animation: typing 1.4s infinite ease-in-out;
@@ -134,6 +133,12 @@
     }
     #file-input {
       display: none;
+    }
+    .dialogflow-iframe {
+      width: 100%;
+      height: 500px;
+      border: none;
+      border-radius: 8px;
     }
   </style>
 </head>
@@ -150,6 +155,7 @@
           <li>Upload images of waste items</li>
         </ul>
       </div>
+      <!-- Dialogflow iframe will be inserted here -->
     </div>
     <div class="chat-input">
       <input type="text" id="user-input" placeholder="Type your message...">
@@ -169,7 +175,7 @@
     const fileInput = document.getElementById('file-input');
     
     // Load your Teachable Machine model
-    const modelUrl = "https://teachablemachine.withgoogle.com/models/Ob5Nn-csT/model.json";
+    const modelUrl = "https://teachablemachine.withgoogle.com/models/g8MJcYx4X/model.json";
     let model;
     
     // Class names (must match your model's classes exactly)
@@ -182,11 +188,23 @@
         model = await tf.loadLayersModel(modelUrl);
         console.log("Model loaded successfully!");
         hideTypingIndicator();
+        
+        // Initialize Dialogflow after model loads
+        initDialogflow();
       } catch (error) {
         console.error("Model loading failed:", error);
         addMessage("⚠️ Error loading waste detector. Please refresh.", "error");
         hideTypingIndicator();
       }
+    }
+    
+    // Initialize Dialogflow
+    function initDialogflow() {
+      const iframe = document.createElement('iframe');
+      iframe.className = 'dialogflow-iframe';
+      iframe.allow = 'microphone';
+      iframe.src = 'https://bot.dialogflow.com/d61fa5f8-ca32-4774-a65d-593e1e6cec91';
+      chatMessages.appendChild(iframe);
     }
     
     // Handle image uploads
@@ -291,17 +309,12 @@
     window.onload = function() {
       initModel();
       
-      // Send message on button click
+      // Send message on button click (for non-Dialogflow messages)
       sendBtn.addEventListener("click", function() {
         const message = userInput.value.trim();
         if (message) {
           addMessage(message, "user");
           userInput.value = "";
-          // Here you would typically send to Dialogflow
-          // For now we'll simulate a response
-          setTimeout(() => {
-            addMessage("I'm your waste assistant. Try uploading an image for classification!", "bot");
-          }, 1000);
         }
       });
       
